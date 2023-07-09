@@ -1,18 +1,31 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from 'cors';
-
-const PORT = '3001'
-
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
+import user from './routes/users.routes'
+import task from './routes/tasks.routes'
 
 
-app.listen(PORT || process.env.PORT, () => {
-    console.log('server connected');
-})
+(() => {
+    const PORT = '3001'
+    const app = express();
+
+    app.use(cors());
+    app.use(express.json());
+
+    //Router
+    app.use('/api/user', user)
+    app.use('/api/task', task)
+
+    app.use('/', (req: Request, res: Response) => {
+        res.json({status: 'Api is running'})
+    })
+
+    app.listen(PORT || process.env.PORT, () => {
+        console.log('server connected');
+    })
+})();
+
+
+
 
 
