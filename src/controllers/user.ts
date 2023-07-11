@@ -22,8 +22,20 @@ export class UserController {
     }
 
     public async create(req: Request, res: Response): Promise<void>{
-        const user = await UserService.instance.createUser('pablo', 'maxwell@123', 23, 'number@123')
-        res.json(user)
+        
+        try {
+            const {user, age, email, password} = req.body
+            const newUser = await UserService.instance.createUser({user, age, email, password})
+            if(newUser){
+                res.status(201).json({
+                    user: newUser
+                })
+            }
+        } catch (error) {
+            
+        }
+        
+        
     }
 
     public async updated(req: Request, res: Response): Promise<void>{
