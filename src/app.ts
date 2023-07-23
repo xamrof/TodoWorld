@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import cors from 'cors';
 import user from './routes/users.routes'
 import task from './routes/tasks.routes'
+import { errorHandler } from "./middlewares/errorHandler";
 
 
 (() => {
@@ -15,6 +16,9 @@ import task from './routes/tasks.routes'
     //Router
     app.use('/api/user', user)
     app.use('/api/task', task)
+
+    //Middlewares    
+    app.use(errorHandler)
 
     app.use('/', (req: Request, res: Response) => {
         res.json({status: 'Api is running'})
