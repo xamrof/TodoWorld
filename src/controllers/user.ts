@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserService } from "../services/userService";
 
 export class UserController {
@@ -13,27 +13,81 @@ export class UserController {
 
     public async getUsers(req: Request, res: Response): Promise<void>{
         const users = await UserService.instance.getAllUsers();
-        res.json(users)
+        res.status(200).json(users)
     }
 
-    public async getUser(req: Request, res: Response): Promise<void>{
-        const user = await UserService.instance.getUser(1234);
-        res.json(user)
+    public async getUser(req: Request, res: Response, next: NextFunction): Promise<void>{
+    
+        try {
+            const {id} = req.params
+            console.log(typeof id)
+            const user = await UserService.instance.getUser(+id);
+            if(user){
+                res.status(200).json({
+                    user
+                })
+            }
+        } catch (error) {
+            next(error)
+        }
+    
     }
 
-    public async create(req: Request, res: Response): Promise<void>{
-        const user = await UserService.instance.createUser('pablo', 'maxwell@123', 23, 'number@123')
-        res.json(user)
+    public async create(req: Request, res: Response, next: NextFunction): Promise<void>{
+        
+        try {
+            const {user, age, email, password} = req.body
+            const newUser = await UserService.instance.createUser({user, age, email, password})
+            if(newUser){
+                res.status(201).json({
+                    msg: 'user created',
+                    user: newUser
+                })
+            }
+        } catch (error) {
+            next(error)
+        }
+        
+        
     }
 
-    public async updated(req: Request, res: Response): Promise<void>{
-        const user = await UserService.instance.editUser(1234);
-        res.json(user)
+    public async updated(req: Request, res: Response, next: NextFunction): Promise<void>{
+        try {
+            const {id} = req.params
+
+            const {age, ...rest} = req.body
+
+            const userUpdated = await UserService.instance.editUser(+id, rest);
+
+            if(userUpdated){
+                res.status(200).json({
+                    msg: 'user updated',
+                    user: userUpdated 
+                })
+            }
+
+        } catch (error) {
+            next(error)
+        }
+        
     }
 
-    public async delete(req: Request, res: Response): Promise<void>{
-        const user = await UserService.instance.deleteUser(1234);
-        res.json(user)
+    public async delete(req: Request, res: Response, next: NextFunction): Promise<void>{
+        
+        try {
+            const {id} = req.params;
+
+            const user = await UserService.instance.deleteUser(+id);
+
+            res.status(200).json({
+                msg: 'user deleted',
+                user
+            })
+    
+        } catch (error) {
+            next(error)
+        }
+    
     }
 
 }
