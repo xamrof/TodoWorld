@@ -65,7 +65,7 @@ export class UserService {
             const user = await this.prisma.user.findUnique({where: {id}})
             if(!user){
                 this.prisma.$disconnect()
-                throw new CustomError("the user does not exist", HttpStatusCode.BAD_REQUEST)
+                throw new CustomError("the user does not exist", HttpStatusCode.UNPROCESSABLE_ENTITY)
             }
 
             this.prisma.$disconnect()

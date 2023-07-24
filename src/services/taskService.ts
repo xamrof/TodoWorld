@@ -26,6 +26,11 @@ export class TaskService {
             
             const priorityLvl = getPriority(priority);
 
+            if(!priorityLvl){
+                throw new CustomError('the date is less than the current date', HttpStatusCode.BAD_REQUEST)
+            }
+
+
             const task = await this.prisma.task.create({
                 data: {...rest, priority: priorityLvl},
                 select: {title: true, description: true, priority: true, authorId: true}
