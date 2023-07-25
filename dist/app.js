@@ -8,6 +8,7 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const users_routes_1 = __importDefault(require("./routes/users.routes"));
 const tasks_routes_1 = __importDefault(require("./routes/tasks.routes"));
+const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const errorHandler_1 = require("./middlewares/errorHandler");
 (() => {
     const PORT = '3001';
@@ -17,6 +18,7 @@ const errorHandler_1 = require("./middlewares/errorHandler");
     //Router
     app.use('/api/user', users_routes_1.default);
     app.use('/api/task', tasks_routes_1.default);
+    app.use('/auth', auth_routes_1.default);
     //Middlewares    
     app.use(errorHandler_1.errorHandler);
     app.use('/', (req, res) => {

@@ -52,8 +52,6 @@ export class TaskService {
     public async getAllTask (userId: number): Promise<TaskModel[]>{
         try {
 
-            //TODO: REVISAR POR QUE ME DA UN ARRAY VACIO
-
             const tasks = await this.prisma.task.findMany({where: {
                 authorId: userId
             }})

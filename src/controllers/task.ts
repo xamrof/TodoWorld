@@ -28,16 +28,21 @@ export class TaskController {
     }
 
     public async getTask(req: Request, res: Response, next: NextFunction): Promise<void>{
+
+        const {id} = req.params
+        
         const user = await TaskService.instance.getTask(1234);
         res.json(user)
     }
 
     public async create(req: Request, res: Response, next: NextFunction): Promise<void>{
 
-        try {
-            const {title, description, priority, authorId} = req.body
+        const {authorId} = req.params
 
-            const task = await TaskService.instance.createTask({title, description, priority, authorId})
+        try {
+            const {title, description, priority} = req.body
+
+            const task = await TaskService.instance.createTask({title, description, priority, authorId: +authorId})
 
             res.status(201).json({
                 msg: 'Task Created',

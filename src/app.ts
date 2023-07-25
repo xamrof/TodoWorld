@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import cors from 'cors';
 import user from './routes/users.routes'
 import task from './routes/tasks.routes'
+import auth from './routes/auth.routes'
 import { errorHandler } from "./middlewares/errorHandler";
 
 
@@ -16,6 +17,7 @@ import { errorHandler } from "./middlewares/errorHandler";
     //Router
     app.use('/api/user', user)
     app.use('/api/task', task)
+    app.use('/auth', auth )
 
     //Middlewares    
     app.use(errorHandler)
