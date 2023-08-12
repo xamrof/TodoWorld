@@ -28,3 +28,4 @@ const errorHandler_1 = require("./middlewares/errorHandler");
         console.log('server connected');
     });
 })();
+//# sourceMappingURL=app.js.map

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UserController } from "../controllers/user";
+import { UserController } from "../controllers/user.controller";
 import { check} from "express-validator";
 import {emailExist, userExist, userByIdExist} from '../helpers/db-validators'
 import { validateFields } from "../middlewares/validateFields";
@@ -17,9 +17,9 @@ router.get('/:id',[
     // invalidId
 ],UserController.instance.getUser);
 router.post('/',[
-    check('password', 'the password must be longer of 6 letter').isLength({min: 5}),
+    check('password', 'the password must be longer of 6 letter').isLength({min: 5}).notEmpty(),
     check('age', 'the age not empty and not string').notEmpty().isInt().not().isString(),
-    check('email', 'not a valid email').isEmail(),
+    check('email', 'not a valid email').isEmail().notEmpty(),
     check('email', 'the email exist').custom(emailExist),
     check('user','the user do not have empty').notEmpty().isString().escape(),
     check('user', 'a user with this name exist').custom(userExist),

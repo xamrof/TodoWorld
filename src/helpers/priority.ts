@@ -1,7 +1,7 @@
 import moment, {Moment} from 'moment'
 import 'moment-timezone'
 
-export const getPriority = (date: string) => {
+export const getPriority = (date: string | undefined) => {
 
     // date > 6 : LOW
     // date > 3 && date < 6: MEDIUM 
@@ -10,12 +10,10 @@ export const getPriority = (date: string) => {
     const timeZone: string = moment.tz.guess()
 
     const currentDate: Moment = moment().tz(timeZone)
-    const targetDate: Moment = moment(date, 'D [de] MMMM')
+    const targetDate: Moment = moment(date, 'MM/DD/YYYY')
 
     const millisecondsDifference: number = targetDate.valueOf() - currentDate.valueOf();
     const dayLeft:number = Math.ceil(millisecondsDifference / (1000 * 60 * 60 * 24));
-
-    console.log(dayLeft)
 
     if(dayLeft >= 6){
         return 'LOW'
@@ -24,7 +22,7 @@ export const getPriority = (date: string) => {
     }else if(dayLeft > 0 && dayLeft <= 3) {
         return 'HIGH'
     }else{
-       return null
+       return undefined
     }
 
 }

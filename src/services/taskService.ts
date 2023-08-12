@@ -1,8 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Task } from "@prisma/client";
 import { getPriority } from "../helpers/priority";
-import { TaskModel } from "../models/task.model.";
+import { TaskEditModel, TaskModel } from "../models/task.model.";
 import { CustomError } from "../models/customError";
 import { HttpStatusCode } from "../utils/httpStatusCode";
+import { JwtPayload } from "jsonwebtoken";
 
 export class TaskService {
     public static _instance: TaskService;
@@ -18,7 +19,7 @@ export class TaskService {
         return this._instance || (this._instance = new this());
     }
 
-    public async createTask (taskModel: TaskModel): Promise<TaskModel> {
+    public async createTask (taskModel: TaskModel, userId: number): Promise<TaskModel> {
         
         const {priority, ...rest} = taskModel
 
@@ -30,9 +31,8 @@ export class TaskService {
                 throw new CustomError('the date is less than the current date', HttpStatusCode.BAD_REQUEST)
             }
 
-
             const task = await this.prisma.task.create({
-                data: {...rest, priority: priorityLvl},
+                data: {...rest, priority: priorityLvl, authorId: userId},
                 select: {title: true, description: true, priority: true, authorId: true}
             })
 
@@ -50,12 +50,14 @@ export class TaskService {
     }
 
     public async getAllTask (userId: number): Promise<TaskModel[]>{
-        try {
 
+        
+        try {
             const tasks = await this.prisma.task.findMany({where: {
                 authorId: userId
             }})
 
+        
             if(!tasks.length){
                 this.prisma.$disconnect()
                 throw new CustomError("this user doesn't any task", HttpStatusCode.BAD_REQUEST)
@@ -68,12 +70,77 @@ export class TaskService {
         }
     }
 
-    public async getTask (id: number): Promise<object>{
-        return {msg: 'Task'}
+    public async getTask (taskId: number,userId: number): Promise<any>{
+        
+        try {
+
+            const task = await this.prisma.task.findUnique(
+                {
+                    where: {id: taskId},
+                    select: {title: true, description: true, priority: true, authorId: true}                
+            })
+
+
+            //TODO: DESECTRUCTURAR TASK PARA SACAR AUTHORID
+
+            if(userId !== task?.authorId){
+                throw new CustomError('the task does not correspond to the current user', HttpStatusCode.UNAUTHORIZED)
+            }
+
+
+            return task
+
+        } catch (error) {
+            throw error
+        }
+
     }
 
-    public async editTask (id: number): Promise<object>{
-        return {msg: 'Task edited'}
+    public async editTask (dataUpdated: TaskEditModel, userId: number, taskId: number): Promise<TaskEditModel>{
+
+        try {
+
+            const {priority, ...rest} = dataUpdated
+
+            if(!priority){
+                const taskUpdated = await this.prisma.task.update(
+                    {
+                      where: {id: taskId}, data: {...rest},
+                      select: {title: true, description: true, priority: true, authorId: true}
+                    }
+                )
+
+                if(userId !== taskUpdated.authorId){
+                    throw new CustomError('the task does not correspond to the current user', HttpStatusCode.UNAUTHORIZED)
+                }
+
+                this.prisma.$disconnect()
+
+                return taskUpdated    
+            }
+
+
+            const priorityLvl = getPriority(priority)
+
+            const taskUpdated = await this.prisma.task.update(
+                {
+                  where: {id: taskId}, data: {...rest, priority: priorityLvl},
+                  select: {title: true, description: true, priority: true, authorId: true,}
+                }
+            )
+
+
+            if(userId !== taskUpdated.authorId){
+                throw new CustomError('the task does not correspond to the current user', HttpStatusCode.UNAUTHORIZED)
+            }
+
+            this.prisma.$disconnect()
+
+            return taskUpdated
+        } catch (error) {
+            throw error
+        }
+
     }
 
     public async deleteTask (id: number): Promise<object>{

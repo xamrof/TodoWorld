@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { AuthService } from "../services/authService";
 
 export class AuthController {
 
@@ -10,15 +11,16 @@ export class AuthController {
         return this._instance || (this._instance = new this());
     }
 
-
-    public async registerUser(req: Request, res: Response, next: NextFunction): Promise<void>{
-                
-    }
-
-
     public async loginUser(req: Request, res: Response, next: NextFunction): Promise<void>{
-
-    }
+        try {
+            const {user, password} = req.body
+            const loginUser = await AuthService.instance.loginUser(user, password)
+            res.status(200).json({loginUser})
+        } catch (error) {
+            next(error)
+        }
+        
+    }   
 
     
 }

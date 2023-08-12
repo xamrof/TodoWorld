@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from 'bcrypt'
 import { CustomError } from "../models/customError";
 import { HttpStatusCode } from "../utils/httpStatusCode";
+import { encodePassword } from "../utils/bycriptPass";
 
 export class UserService {
     public static _instance: UserService;
@@ -18,15 +19,13 @@ export class UserService {
         return this._instance || (this._instance = new this());
     }
 
-    public async createUser (userModel: UserModel): Promise<UserModel> {
+    public async createUser (userModel: UserModel): Promise<any> {
 
         //TODO: CREAR ERROR Y AUTENTIFICACION
 
         try {
-            let password = ''
-            if(userModel.password){
-                password = bcrypt.hashSync(userModel.password, bcrypt.genSaltSync(10));    
-            }
+
+            const password = encodePassword(userModel.password)
 
             //TODO: La razón por la que no da el error de que no detecta el password es por que falta el middleware
                       
@@ -72,7 +71,6 @@ export class UserService {
 
             return user
         } catch (error) {
-            console.error(error)
             await this.prisma.$disconnect()
             throw error; 
         }
