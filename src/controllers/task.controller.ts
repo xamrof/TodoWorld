@@ -98,8 +98,17 @@ export class TaskController {
     }
 
     public async delete(req: Request, res: Response): Promise<void>{
-        const user = await TaskService.instance.deleteTask(1234);
-        res.json(user)
+
+        const user = req.user
+        
+        if(!user){
+            throw new CustomError('user invalid', HttpStatusCode.UNAUTHORIZED)
+        }
+
+        const {taskId} = req.params
+
+        const task = await TaskService.instance.deleteTask(+taskId, +user);
+        res.status(200).json(task)
     }
 
 }

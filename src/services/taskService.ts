@@ -1,9 +1,9 @@
-import { PrismaClient, Task } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { getPriority } from "../helpers/priority";
 import { TaskEditModel, TaskModel } from "../models/task.model.";
 import { CustomError } from "../models/customError";
 import { HttpStatusCode } from "../utils/httpStatusCode";
-import { JwtPayload } from "jsonwebtoken";
+// import { prisma } from "src/models/prismaModel";
 
 export class TaskService {
     public static _instance: TaskService;
@@ -143,8 +143,30 @@ export class TaskService {
 
     }
 
-    public async deleteTask (id: number): Promise<object>{
-        return {msg: 'Task deleted'}
+    public async deleteTask (taskId: number, userId: number): Promise<object>{
+        
+        const taskUserId = await this.prisma.task.findUnique({where: {id: taskId}, select: {authorId: true}})
+
+        try {
+            if(!taskUserId){
+                this.prisma.$disconnect()
+                throw new CustomError('the user not exist ', HttpStatusCode.UNAUTHORIZED)
+            }
+    
+            if(taskUserId.authorId !== userId){
+                this.prisma.$disconnect()
+                throw new CustomError('the user not correspond with the id of the task ', HttpStatusCode.UNAUTHORIZED)
+            }
+    
+            const taskDelete = await this.prisma.task.delete({where: {id: taskId}})
+
+            return taskDelete
+        } catch (error) {
+            throw error
+        }
+
+        
+
     }
 
 }
